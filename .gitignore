@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+python-path.txt
+*.lnk
+*.log
+.venv/
+dist/
