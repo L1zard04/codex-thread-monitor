@@ -181,6 +181,16 @@ class StorageTests(unittest.TestCase):
         self.assertEqual(store.load()['slots'], [None]*4)
         self.assertTrue(store.error)
 
+    def test_legacy_configuration_and_invalid_optional_read_markers_keep_slots(self):
+        store=ConfigStore(self.root/'config.json')
+        slots=[{'id':'a','title':'Saved','project':'A'},None,None,None]
+        for attention in [None,[],{'a':{'latest':17,'read':False}}]:
+            store.path.write_text(json.dumps({'slots':slots,'attention':attention}),encoding='utf-8')
+            config=store.load()
+            self.assertEqual(config['slots'],slots)
+            self.assertEqual(config['attention'],{})
+            self.assertFalse(store.error)
+
 
 if __name__ == '__main__':
     unittest.main()
