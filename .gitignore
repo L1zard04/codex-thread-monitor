@@ -3,5 +3,6 @@ __pycache__/
 python-path.txt
 *.lnk
 *.log
+status-history.jsonl*
 .venv/
 dist/

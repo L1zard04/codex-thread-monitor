@@ -181,7 +181,8 @@ class ConfigStore:
         self.error = ''
 
     def load(self) -> dict:
-        default = {'slots': [None]*4, 'topmost': True}
+        default = {'slots': [None]*4, 'topmost': True, 'attention':{}, 'geometry':None,
+                   'view_mode':'full', 'notifications':False}
         if not self.path.exists():
             return default
         try:
@@ -195,7 +196,17 @@ class ConfigStore:
                    for x in slots):
                 raise ValueError('格子配置无效')
             self.error = ''
-            return {'slots': slots, 'topmost': bool(data.get('topmost', True))}
+            raw = data.get('attention',{})
+            ids = {slot['id'] for slot in slots if slot}
+            attention = {tid:{'latest':entry['latest'], 'read':entry['read'],
+                              'unread':bool(entry.get('unread',False))}
+                         for tid,entry in (raw.items() if isinstance(raw,dict) else [])
+                         if tid in ids and isinstance(entry,dict) and
+                         isinstance(entry.get('latest'),str) and isinstance(entry.get('read'),str)}
+            return {'slots': slots, 'topmost': bool(data.get('topmost', True)),
+                    'attention':attention, 'geometry':data.get('geometry'),
+                    'view_mode':'compact' if data.get('view_mode')=='compact' else 'full',
+                    'notifications':data.get('notifications') is True}
         except (OSError, ValueError) as e:
             self.error = f'配置读取失败，已使用空面板：{e}'
             return default
